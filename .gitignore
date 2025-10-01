@@ -39,3 +39,6 @@
 
 # debug information files
 *.dwo
+
+# Roan added
+*.DS_Store
