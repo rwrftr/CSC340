@@ -13,7 +13,6 @@ Dictionary::Dictionary() : keywordCount_(0), definitionCount_(0) {}
 
 void Dictionary::loadData(string path){
   fstream ioFile;
-
   cout << "! Opening data file... " << path << endl;
 
   // while the current path doesn't exist, prompt user for new path
@@ -60,29 +59,47 @@ void Dictionary::loadData(string path){
 }
 
 vector<Entry> Dictionary::query(const string &keyword,
-                                const string *posFilter,
+                                const string posFilter,
                                 bool useDistinct,
                                 bool useReverse) const
 {
   vector<Entry> results;
-  // TODO:
-  // 1) normalize keyword, find in dict_
-  set<int> set{};
-  vector<Entry> Entries = dict_.at(keyword);
+  //keyword = (normalizeKeyword(keyword));
 
-  // only if posFilter exists
-  for(Entry current : Entries){
-    if (current.partOfSpeech != *posFilter){
-      //Entries.erase(current);
-    }
+  // print error message if keyword not found
+  if(dict_.find(keyword) == dict_.end()){
+    return;
   }
 
-  if(useDistinct){}
-  if(useReverse){}
+  // grab the entries
+  results = dict_.at(keyword);
 
-  // 2) filter by pos if provided
-  // 3) apply distinct (deduplicate by definition)
-  // 4) apply reverse (reverse order)
+  // filter by POS if provided
+  if((posFilter != "") && (isValidPartOfSpeech(posFilter))){
+    for (std::vector<Entry>::iterator it = results.begin(); it != results.end();){
+      Entry current = *it;
+      if(current.partOfSpeech != posFilter){
+       results.erase(it); 
+      }
+    } 
+  } 
+  
+  if(useDistinct){
+    // TODO
+
+    // a set containing all the checked definitions
+    // iterate through the results vector and remove entries that already 
+    //.   got checked i.e. are already in the set
+
+  }
+  if(useReverse){
+    // TODO
+
+    vector<Entry> backwards;
+    // pop from bottom of results vector and push to bottom of backwards vector
+    results = backwards;
+  }
+
   return results;
 }
 

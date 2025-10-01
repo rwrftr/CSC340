@@ -23,7 +23,7 @@ public:
 
   // Query with optional filters (returns matching entries).
   vector<Entry> query(const string &keyword,
-                           const string *posFilter,
+                           const string posFilter,
                            bool useDistinct,
                            bool useReverse) const;
 
