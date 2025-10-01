@@ -5,12 +5,13 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <set>
 
 using namespace std;
 
 Dictionary::Dictionary() : keywordCount_(0), definitionCount_(0) {}
 
-void Dictionary::loadData(const vector<tuple<string, string, string>> &rawData, string path){
+void Dictionary::loadData(string path){
   fstream ioFile;
 
   cout << "! Opening data file... " << path << endl;
@@ -25,14 +26,37 @@ void Dictionary::loadData(const vector<tuple<string, string, string>> &rawData, 
   
   // once current path DOES exist...
   ioFile.open(path, ios::in);
+  string line, keyword, pos, definition;
+  vector<Entry> newVector;
+
+  // for every line, separate keyword, part of speech, then definition
+  while (getline(ioFile, line)) {
+    newVector.clear(); // erase last time's entry
+
+    // cut off keyword
+    keyword = line.substr(0,line.find_first_of(" ")+1); 
+    line = line.substr(line.find_last_of(" ")+1); 
+
+    // cut off pos
+    pos = line.substr(0,line.find_first_of(" ")+1); 
+    line = line.substr(line.find_last_of(" ")+1);
+    
+    // cut off definition
+    definition = line;
+
+    // if the dictionary already has the keyword, grab the existing vector
+    if(dict_.find(keyword) != dict_.end()){ newVector = dict_.at(keyword); } 
+
+    // add pos and definition, then add vector to dictionary
+    newVector.push_back({pos, definition});
+    dict_.insert({keyword, newVector});
+  }
+
+  keywordCount_ = dict_.size();
+  //definitionsCount_
 
   ioFile.close();
-  
-  
-  // TODO: Insert each triple {keyword, pos, definition} into dict_
-  // - normalize keyword
-  // - push_back an Entry into the vector
-  // - update counts
+  return;
 }
 
 vector<Entry> Dictionary::query(const string &keyword,
@@ -43,17 +67,30 @@ vector<Entry> Dictionary::query(const string &keyword,
   vector<Entry> results;
   // TODO:
   // 1) normalize keyword, find in dict_
+  set<int> set{};
+  vector<Entry> Entries = dict_.at(keyword);
+
+  // only if posFilter exists
+  for(Entry current : Entries){
+    if (current.partOfSpeech != *posFilter){
+      //Entries.erase(current);
+    }
+  }
+
+  if(useDistinct){}
+  if(useReverse){}
+
   // 2) filter by pos if provided
   // 3) apply distinct (deduplicate by definition)
   // 4) apply reverse (reverse order)
   return results;
 }
 
-size_t Dictionary::keywordCount() const{
+int Dictionary::keywordCount() const{
   return keywordCount_;
 }
 
-size_t Dictionary::definitionCount() const{
+int Dictionary::definitionCount() const{
   return definitionCount_;
 }
 

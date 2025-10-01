@@ -19,7 +19,7 @@ public:
   Dictionary();
 
   // Load all keyword data (called once at start).
-  void loadData(const vector<tuple<string, string, string>> &rawData, const string path);
+  void loadData(const string path);
 
   // Query with optional filters (returns matching entries).
   vector<Entry> query(const string &keyword,
@@ -28,8 +28,8 @@ public:
                            bool useReverse) const;
 
   // Counts for header display
-  size_t keywordCount() const;
-  size_t definitionCount() const;
+  int keywordCount() const;
+  int definitionCount() const;
 
   // Validate if given token is a part of speech
   static bool isValidPartOfSpeech(const string &token);
@@ -38,8 +38,8 @@ private:
   // Main storage: keyword → list of entries
   unordered_map<string, vector<Entry>> dict_;
 
-  size_t keywordCount_;
-  size_t definitionCount_;
+  int keywordCount_;
+  int definitionCount_;
 
   static string normalizeKeyword(const string &s);
 };
