@@ -6,7 +6,7 @@
 #include <fstream>
 #include <string>
 #include <set>
-
+#include <filesystem>
 using namespace std;
 
 Dictionary::Dictionary() : keywordCount_(0), definitionCount_(0) {}
@@ -15,45 +15,51 @@ void Dictionary::loadData(string path){
   fstream ioFile;
   cout << "! Opening data file... " << path << endl;
 
+  ioFile.open(path, ios::in);
+
   // while the current path doesn't exist, prompt user for new path
-  while(!(filesystem::exists(path))){
+  while(!(ioFile.is_open())){
     cout << "<!>ERROR<!> ===> File could not be opened." << endl <<
             "<!>ERROR<!> ===> provided file path: " << path << endl <<
             "<!>Enter the CORRECT data file path: ";
     getline(cin, path);
+    ioFile.open(path, ios::in);
   }
   
   // once current path DOES exist...
-  ioFile.open(path, ios::in);
   string line, keyword, pos, definition;
-  vector<Entry> newVector;
 
   // for every line, separate keyword, part of speech, then definition
   while (getline(ioFile, line)) {
-    newVector.clear(); // erase last time's entry
-
-    // cut off keyword
-    keyword = line.substr(0,line.find_first_of(" ")+1); 
-    line = line.substr(line.find_last_of(" ")+1); 
-
-    // cut off pos
-    pos = line.substr(0,line.find_first_of(" ")+1); 
-    line = line.substr(line.find_last_of(" ")+1);
+    if(line.length() <1) {continue;}
     
-    // cut off definition
-    definition = line;
+    // parse: keyword pos definition (space separated; definition may contain spaces)
+    size_t p1 = line.find(' ');
+    if (p1 == string::npos) continue; // malformed line -> skip
+    keyword = line.substr(0, p1);
+    keyword.at(0) = toupper(keyword.at(0));
+    cout << keyword << " ";
+    size_t p2 = line.find(' ', p1 + 1);
+    if (p2 == string::npos) continue; // malformed line -> skip
+    pos = line.substr(p1 + 1, p2 - (p1 + 1));
+    cout << pos << " ";
+    definition = line.substr(p2 + 1);
+    cout << definition << endl;
 
-    // if the dictionary already has the keyword, grab the existing vector
-    if(dict_.find(keyword) != dict_.end()){ newVector = dict_.at(keyword); } 
-
-    // add pos and definition, then add vector to dictionary
-    newVector.push_back({pos, definition});
-    dict_.insert({keyword, newVector});
+    // normalize: remove any stray leading/trailing spaces (if needed)
+    // (keeping case as-is may be desired; adapt if needed)
+    
+    // add pos and definition to dictionary; using operator[] ensures vector exists
+    Entry e;
+    e.partOfSpeech = pos;
+    e.definition = definition;
+    dict_[keyword].push_back(e);
+    ++definitionCount_;
   }
 
   keywordCount_ = dict_.size();
   //definitionsCount_
-
+ 
   ioFile.close();
   return;
 }
@@ -64,24 +70,23 @@ vector<Entry> Dictionary::query(const string &keyword,
                                 bool useReverse) const
 {
   vector<Entry> results;
-  //keyword = (normalizeKeyword(keyword));
 
-  // print error message if keyword not found
-  if(dict_.find(keyword) == dict_.end()){
-    return;
+  // if keyword not found, return empty results
+  auto it = dict_.find(keyword);
+  if(it == dict_.end()){
+    return results;
   }
 
-  // grab the entries
-  results = dict_.at(keyword);
+  // grab the entries (copy)
+  results = it->second;
 
-  // filter by POS if provided
-  if((posFilter != "") && (isValidPartOfSpeech(posFilter))){
-    for (std::vector<Entry>::iterator it = results.begin(); it != results.end();){
-      Entry current = *it;
-      if(current.partOfSpeech != posFilter){
-       results.erase(it); 
-      }
-    } 
+  // filter by POS if provided (posFilter expected to be empty string if not used)
+  if(!posFilter.empty()){
+    vector<Entry> filtered;
+    for (const Entry &current : results) {
+      if (current.partOfSpeech == posFilter) filtered.push_back(current);
+    }
+    results = std::move(filtered);
   } 
   
   if(useDistinct){
@@ -92,13 +97,7 @@ vector<Entry> Dictionary::query(const string &keyword,
     //.   got checked i.e. are already in the set
 
   }
-  if(useReverse){
-    // TODO
-
-    vector<Entry> backwards;
-    // pop from bottom of results vector and push to bottom of backwards vector
-    results = backwards;
-  }
+  if(useReverse){ reverse(results.begin(), results.end()); }
 
   return results;
 }
@@ -111,18 +110,4 @@ int Dictionary::definitionCount() const{
   return definitionCount_;
 }
 
-string Dictionary::normalizeKeyword(const string &s){
-  string out = s;
-  for (auto &c : out)
-    c = tolower(c);
-  return out;
-}
 
-bool Dictionary::isValidPartOfSpeech(const string &token)
-{
-  static unordered_set<string> POS = {
-      "noun", "verb", "adjective", "adverb",
-      "conjunction", "interjection", "preposition", "pronoun"};
-  string t = normalizeKeyword(token);
-  return POS.count(t) > 0;
-}

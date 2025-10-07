@@ -6,11 +6,10 @@ using namespace std;
 
 int main(){
   Dictionary dict;
-  const string path = "./[path]";
+  const string path = "inputFile.txt";
 
   // TODO: load data (from file or hardcoded rawData vector of tuples)
-  // dict.loadData(rawData);
-
+  dict.loadData(path);
   Helpers::printHeader(dict.keywordCount(), dict.definitionCount());
 
   int searchCount = 1;
@@ -31,9 +30,16 @@ int main(){
       Helpers::printBar();
       continue;
     }
+    
+    // parse line into {keyword, optional pos, distinct?, reverse?}
+    vector<string> inputs = Helpers::parseInput(line);
+    vector<Entry> results = dict.query(inputs.at(0),
+                                        inputs.at(1),
+                                        (inputs.at(1) != ""),
+                                        (inputs.at(2) != "")); // query(keyword, pos, bool, bool);
+    
+    Helpers::printEntries(inputs.at(0), results);
 
-    // TODO: parse line into {keyword, optional pos, distinct?, reverse?, warnings}
-    // - call dict.query(...)
     // - print warnings if needed
     // - print results or not found
   }

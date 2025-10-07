@@ -20,6 +20,14 @@ namespace Helpers{
   // Print results
   void printEntries(const string &keyword, const vector<Entry> &entries);
 
+  // toLower basically
+  static string normalizeString(const string &s);
+
+  // Validate if given token is a part of speech
+  static bool isValidPartOfSpeech(const string &token);
+
+  vector<string> parseInput(string line);
+
   // Print warnings for bad parameters (2nd, 3rd, 4th)
   void printWarning2(const string &bad);
   void printWarning3(const string &bad);

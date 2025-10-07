@@ -31,17 +31,12 @@ public:
   int keywordCount() const;
   int definitionCount() const;
 
-  // Validate if given token is a part of speech
-  static bool isValidPartOfSpeech(const string &token);
-
 private:
   // Main storage: keyword → list of entries
-  unordered_map<string, vector<Entry>> dict_;
+  unordered_map<string, vector<Entry> > dict_;
 
   int keywordCount_;
   int definitionCount_;
-
-  static string normalizeKeyword(const string &s);
 };
 
 #endif // DICTIONARY_H
