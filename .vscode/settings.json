@@ -5,6 +5,9 @@
     "istream": "cpp",
     "fstream": "cpp",
     "unordered_map": "cpp",
-    "__hash_table": "cpp"
+    "__hash_table": "cpp",
+    "string": "cpp",
+    "vector": "cpp",
+    "filesystem": "cpp"
   }
 }
