@@ -49,7 +49,6 @@ namespace Helpers{
   }
 
   bool isValidPartOfSpeech(const string &token){
-    // avoid C++11 braced init so code compiles w/o -std=c++11 if needed
     static unordered_set<string> POS;
     if (POS.empty()) {
       POS.insert("noun");
@@ -67,39 +66,42 @@ namespace Helpers{
  
   vector<string> parseInput(string line){
     // returns exactly 4 slots: {keyword, pos?, distinct?, reverse?}
-    // avoid braced initializer for older compilers: create 4 empty slots
     vector<string> parameters(4);
      
-     line = normalizeString(line);
-     line.at(0) = toupper(line.at(0));
+    // all lowercase, leading uppercase
+    line = normalizeString(line);
+    line.at(0) = toupper(line.at(0));
 
-    // cut out the keyword (robustly)
+    // cut out the keyword
     size_t space = line.find(' ');
     if (space == string::npos) {
-      // single token only -> that is the keyword
+      // no spaces means line is the keyword
       parameters[0] = line;
       return parameters;
     }
-    parameters[0] = line.substr(0, space);
-    // remove keyword + following spaces
-    line = line.substr(space + 1);
-    // trim leading spaces
-    while (!line.empty() && line.front() == ' ') line.erase(0, 1);
 
+    // move keyword, remove keyword + following spaces
+    parameters[0] = line.substr(0, space);
+    line = line.substr(space + 1);
+
+    // get rid of any extra spaces in front
+    while (!line.empty() && line.front() == ' '){ line.erase(0, 1); }
+
+    // while there are more characters in the input string
     string currentParam;
     while (!line.empty()) {
       space = line.find(' ');
+
       if (space == string::npos) {
         currentParam = line;
         line.clear();
       } else {
         currentParam = line.substr(0, space);
         line = line.substr(space + 1);
-        // trim leading spaces
         while (!line.empty() && line.front() == ' ') line.erase(0, 1);
       }
 
-      if (currentParam.empty()) continue;
+      if (currentParam.empty()) { continue; }
 
       if(isValidPartOfSpeech(currentParam)){ 
         if (parameters.at(1).empty()) parameters.at(1) = currentParam;
@@ -109,9 +111,6 @@ namespace Helpers{
       }
       else if(currentParam == "reverse"){ 
         if (parameters.at(3).empty()) parameters.at(3) = "reverse";
-      }
-      else {
-        // unknown token - we ignore here; main can check and warn if necessary
       }
     }
 

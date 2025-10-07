@@ -7,15 +7,14 @@ using namespace std;
 int main(){
   Dictionary dict;
   const string path = "inputFile.txt";
-
-  // TODO: load data (from file or hardcoded rawData vector of tuples)
   dict.loadData(path);
   Helpers::printHeader(dict.keywordCount(), dict.definitionCount());
+  string line;
 
   int searchCount = 1;
   while (true){
     cout << "Search [" << searchCount++ << "]: ";
-    string line;
+    
     if (!getline(cin, line))
       break;
 
@@ -33,15 +32,22 @@ int main(){
     
     // parse line into {keyword, optional pos, distinct?, reverse?}
     vector<string> inputs = Helpers::parseInput(line);
+    // query(keyword, pos, bool, bool);
     vector<Entry> results = dict.query(inputs.at(0),
                                         inputs.at(1),
                                         (inputs.at(1) != ""),
-                                        (inputs.at(2) != "")); // query(keyword, pos, bool, bool);
+                                        (inputs.at(2) != "")); 
     
+    if(results.size() < 1){
+      // print no results
+      cout << "no results found" << endl;
+      continue;
+    }
+                              
+    // print results                                  
     Helpers::printEntries(inputs.at(0), results);
 
-    // - print warnings if needed
-    // - print results or not found
+    // TODO: print warnings if needed
   }
 
   return 0;
