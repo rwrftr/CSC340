@@ -62,10 +62,32 @@ void makeAMove(char boarArr[][3], char symbol){
   bool isValid = false;
   int row, col;
   while (!isValid){
-    row = rand() % 3;
-    col = rand() % 3;
+    // row = rand() % 3;
+    // col = rand() % 3;
+
+    cout << "enter a row (1-3) for player " << symbol << ": ";
+    cin >> row;
+
+    if(row > 3 || row < 1){
+      cout << "entered row " << row << "is invalid. Must be between 1 and 3 inclusive. Please enter a different row" << endl;
+      continue; 
+    }
+
+    cout << "enter a column (1-3) for player " << symbol << ": ";
+    cin >> col;
+
+    if(col > 3 || col < 1){
+      cout << "entered column " << col << "is invalid. Must be between 1 and 3 inclusive. Please enter a different column" << endl;
+      continue; 
+    }
   
+    row -= 1; 
+    col -= 1;
+    
     if(boarArr[row][col] == ' '){isValid = true;}
+    else {
+      cout << "This cell is already occupied. Try a different cell" << endl;
+    }
   }
 
   boarArr[row][col] = symbol;
